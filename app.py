@@ -1,51 +1,62 @@
 import streamlit as st
+import os
 
-# --- CONFIGURATION IOS ---
-# Configuration pour que ça ressemble à une App native
-st.set_page_config(page_title="VSAV Carbone", page_icon="🚑", layout="centered")
+# --- FONCTION SECURISEE POUR CHARGER L'IMAGE ---
+# Cela évite que l'app plante si vous oubliez de mettre l'image
+def charger_logo():
+    if os.path.exists("logo.png"):
+        return "logo.png"
+    else:
+        return "🚑" # Icône par défaut si pas d'image
 
-# --- EN-TÊTE ---
-st.title("🚑 VSAV : Urgence")
-st.caption("Calculateur d'empreinte carbone (Scope 1 - Diesel)")
+# --- CONFIGURATION DE LA PAGE ---
+st.set_page_config(
+    page_title="Rachid VSAV", 
+    page_icon=charger_logo(),
+    layout="centered"
+)
 
-# --- VARIABLES DU GIEC (IPCC) ---
-# Facteur d'émission Diesel (Combustion + Amont)
-# Source approx IPCC/Base Carbone : ~3.17 kg CO2e par Litre de Diesel
-FACTEUR_IPCC_DIESEL = 3.17 
+# --- RECUPERATION AUTOMATIQUE (GPS VIA URL) ---
+# On regarde si l'URL contient ?km=50
+parametres = st.query_params
+distance_auto = parametres.get("km", None)
 
-# --- SAISIE (INTERFACE SIMPLE) ---
+# --- BARRE LATERALE (VOTRE MARQUE) ---
+st.sidebar.title("Configuration")
+if os.path.exists("logo.png"):
+    st.sidebar.image("logo.png", width=150)
+st.sidebar.caption("Développé par **Rachid AMIHA**")
+
+# --- CORPS DE L'APPLICATION ---
+st.title("🚑 VSAV : Rachid AMIHA")
+st.write("Calculateur d'empreinte carbone connecté.")
+
+# Gestion de la distance par défaut
+valeur_defaut = 30
+if distance_auto:
+    try:
+        valeur_defaut = int(float(distance_auto))
+        st.success(f"📍 Distance reçue du GPS : **{valeur_defaut} km**")
+    except:
+        st.warning("Erreur de lecture GPS")
+
 st.write("---")
-st.subheader("📍 Données de l'intervention")
 
-# Saisie tactile adaptée aux doigts sur iPhone
-distance = st.number_input("Distance A/R (km)", min_value=1, value=30, step=1)
+# --- SAISIE ---
+st.subheader("Données de la mission")
+distance = st.slider("Distance (km)", 0, 300, valeur_defaut)
+conso = st.select_slider("Consommation", options=[10, 15, 18, 20, 25], value=18)
 
-# Curseur pour la consommation (Mode Urgence = consommation élevée)
-# Un VSAV en urgence consomme entre 15L et 20L/100km
-conso_reelle = st.slider("Consommation (L/100km)", min_value=10, max_value=30, value=18)
+# --- CALCUL ---
+# Facteur Diesel (Scope 1 + 3 Amont)
+facteur_diesel = 3.17 
+co2 = (distance * conso / 100) * facteur_diesel
 
-# --- MOTEUR DE CALCUL ---
-litres_consommes = (distance * conso_reelle) / 100
-co2_total = litres_consommes * FACTEUR_IPCC_DIESEL
-
-# --- AFFICHAGE RESULTATS ---
+# --- RESULTATS ---
 st.write("---")
 st.header("Résultat")
+st.metric("Empreinte Carbone", f"{co2:.2f} kg CO2e")
 
-# Affichage en gros chiffres pour lecture rapide
-st.metric(label="Empreinte Carbone Totale", value=f"{co2_total:.2f} kg CO2e")
-
-# --- EQUIVALENCE (PEDAGOGIQUE) ---
-# Hypothèse : 1 recharge de smartphone ≈ 5g de CO2 (0.005 kg)
-nb_smartphones = co2_total / 0.005
-
-st.success(f"📱 C'est l'équivalent de **{int(nb_smartphones)}** recharges de smartphone.")
-
-# --- NOTE PEDAGOGIQUE ---
-with st.expander("ℹ️ Comprendre le calcul (IPCC)"):
-    st.write(f"""
-    Ce calcul prend en compte la combustion du Diesel d'un VSAV.
-    - **Scénario :** Urgence (conduite dynamique).
-    - **Facteur d'émission :** {FACTEUR_IPCC_DIESEL} kg CO2e/Litre.
-    - **Formule :** (Dist x Conso / 100) x Facteur.
-    """)
+# Equivalence
+smartphones = int(co2 / 0.005)
+st.info(f"📱 Équivalent à la recharge de **{smartphones}** smartphones.")
