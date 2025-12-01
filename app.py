@@ -39,7 +39,19 @@ if os.path.exists("logo.png"):
 st.sidebar.caption("Développé par **Rachid AMIHA**")
 
 # --- 4. INTERFACE UTILISATEUR ---
-st.title("🚑 VSAV : Rachid AMIHA")
+# --- 4. INTERFACE UTILISATEUR (TITRE AVEC LOGO) ---
+# On crée deux colonnes : une petite pour l'image (1) et une grande pour le texte (5)
+col_logo, col_texte = st.columns([1, 5])
+
+with col_logo:
+    if os.path.exists("logo.png"):
+        st.image("logo.png", width=100) # Vous pouvez ajuster la taille ici
+    else:
+        st.write("🚑")
+
+with col_texte:
+    st.title("VSAV : Rachid AMIHA")
+    st.write("Calculateur d'empreinte carbone connecté.")
 st.write("Calculateur d'empreinte carbone connecté.")
 
 st.write("---")
@@ -60,3 +72,4 @@ st.metric("Empreinte Carbone", f"{co2:.2f} kg CO2e")
 
 nb_smartphones = int(co2 / 0.005)
 st.info(f"📱 Équivalent à la recharge de **{nb_smartphones}** smartphones.")
+
