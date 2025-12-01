@@ -1,75 +1,107 @@
 import streamlit as st
 import os
 
-# --- 1. CONFIGURATION ET IMPORT DU LOGO ---
+# --- 1. CONFIGURATION & BRANDING ---
 def charger_logo():
     if os.path.exists("logo.png"):
         return "logo.png"
     else:
-        return "🚑"
+        return "🌿"
 
 st.set_page_config(
-    page_title="Rachid VSAV", 
+    page_title="Anamnèse Env.", 
     page_icon=charger_logo(),
     layout="centered"
 )
 
-# --- 2. LOGIQUE GPS INTELLIGENTE (Compatible virgule) ---
-# On récupère les paramètres de l'URL
-query_params = st.query_params
-distance_auto = query_params.get("km", None)
-
-valeur_defaut = 30 # Valeur de départ si pas de GPS
-
-if distance_auto:
-    try:
-        # Nettoyage : on enlève "km", on change la virgule en point, on enlève les espaces
-        clean_dist = distance_auto.lower().replace("km", "").replace(",", ".").strip()
-        # Conversion en nombre entier
-        valeur_defaut = int(float(clean_dist))
-        # Message de succès
-        st.success(f"📍 Distance reçue du GPS : **{valeur_defaut} km**")
-    except:
-        st.warning(f"⚠️ Erreur lecture GPS (Reçu : '{distance_auto}'). Utilisation valeur par défaut.")
-
-# --- 3. BARRE LATERALE (VOTRE MARQUE) ---
-st.sidebar.title("Configuration")
-if os.path.exists("logo.png"):
-    st.sidebar.image("logo.png", width=150)
-st.sidebar.caption("Développé par **Rachid AMIHA**")
-
-# --- 4. INTERFACE UTILISATEUR ---
-# --- 4. INTERFACE UTILISATEUR (TITRE AVEC LOGO) ---
-# On crée deux colonnes : une petite pour l'image (1) et une grande pour le texte (5)
+# Colonnes pour le Titre + Logo
 col_logo, col_texte = st.columns([1, 5])
-
 with col_logo:
     if os.path.exists("logo.png"):
-        st.image("logo.png", width=100) # Vous pouvez ajuster la taille ici
+        st.image("logo.png", width=100)
     else:
-        st.write("🚑")
+        st.write("🌿")
 
 with col_texte:
-    st.title("VSAV : Rachid AMIHA")
-    st.write("Calculateur d'empreinte carbone connecté.")
-st.write("Calculateur d'empreinte carbone connecté.")
+    st.title("Dr. Rachid AMIHA")
+    st.subheader("Assistant d'Anamnèse Environnementale")
 
+st.markdown("---")
+
+# --- 2. INTERFACE : LE PATIENT ---
+st.sidebar.header("Profil du Patient")
+zone_geo = st.sidebar.selectbox(
+    "Zone d'habitation",
+    ["Agadir (Urbain/Industriel)", "Zagora (Oasis/Aride)", "Tiznit (Rural/Agricole)"]
+)
+age_patient = st.sidebar.radio("Tranche d'âge", ["Enfant", "Adulte", "Personne Âgée"])
+
+st.info(f"📁 **Dossier en cours :** Patient ({age_patient}) résidant à **{zone_geo.split(' ')[0]}**.")
+
+# --- 3. SAISIE DES SYMPTÔMES ---
+st.write("### 🩺 Quels sont les motifs de consultation ?")
+
+symptomes_respi = st.multiselect(
+    "Symptômes Respiratoires",
+    ["Toux chronique", "Crise d'asthme", "Difficulté respiratoire", "Irritation nez/gorge"]
+)
+
+symptomes_diges = st.multiselect(
+    "Symptômes Digestifs / Autres",
+    ["Douleurs abdominales", "Diarrhée aigüe", "Vomissements", "Fatigue inexpliquée", "Irritations cutanées"]
+)
+
+# --- 4. LE CERVEAU (ALGORITHME DE DIAGNOSTIC) ---
+# C'est ici que votre expertise scientifique s'exprime
 st.write("---")
-st.subheader("Données de la mission")
+st.write("### 🔍 Guide d'Interrogatoire Environnemental")
 
-# Le curseur prend la valeur du GPS (valeur_defaut)
-distance = st.slider("Distance (km)", 0, 300, valeur_defaut)
-conso = st.select_slider("Consommation (L/100km)", options=[10, 15, 18, 20, 25], value=18)
+if not (symptomes_respi or symptomes_diges):
+    st.caption("👈 Sélectionnez des symptômes pour générer les questions d'anamnèse.")
 
-# --- 5. CALCULS ---
-facteur_diesel = 3.17 
-co2 = (distance * conso / 100) * facteur_diesel
+else:
+    # --- SCENARIO 1 : AGADIR + RESPIRATOIRE ---
+    if "Agadir" in zone_geo and len(symptomes_respi) > 0:
+        st.error("🚨 **Alerte : Exposition Atmosphérique Probable**")
+        st.write("Contexte : Agadir (Pollution trafic, Activité Portuaire, Pollens)")
+        
+        with st.expander("🗣️ Questions à poser au patient (L'Enquête)", expanded=True):
+            st.markdown("""
+            - "Habitez-vous à moins de 200m d'un grand axe routier ?" (PM2.5)
+            - "Avez-vous remarqué des dépôts de poussière noire sur vos fenêtres ?"
+            - "Les symptômes s'aggravent-ils lors des jours de Chergui ?"
+            """)
+        st.success("💡 **Conseil Préventif :** Limiter l'aération aux heures de pointe. Port du masque en cas de vent de sable.")
 
-# --- 6. RÉSULTATS ---
+    # --- SCENARIO 2 : ZAGORA/TIZNIT + DIGESTIF ---
+    elif ("Zagora" in zone_geo or "Tiznit" in zone_geo) and len(symptomes_diges) > 0:
+        st.warning("💧 **Alerte : Risque Hydrique / Vectoriel**")
+        st.write("Contexte : Zone Rurale/Aride (Qualité de l'eau, stockage)")
+        
+        with st.expander("🗣️ Questions à poser au patient (L'Enquête)", expanded=True):
+            st.markdown("""
+            - "Consommez-vous de l'eau provenant d'un puits ou d'une 'Matfia' ?"
+            - "Comment stockez-vous votre eau potable à domicile ?"
+            - "Y a-t-il eu un changement de couleur ou de goût de l'eau récemment ?"
+            """)
+        st.success("💡 **Conseil Préventif :** Chloration de l'eau de stockage ou ébullition avant consommation.")
+
+    # --- SCENARIO 3 : AGRICOLE + CUTANÉ/FATIGUE ---
+    elif "Rural" in zone_geo and ("Fatigue inexpliquée" in symptomes_diges or "Irritations cutanées" in symptomes_diges):
+        st.warning("⚠️ **Alerte : Exposition Chimique (Pesticides)**")
+        
+        with st.expander("🗣️ Questions à poser au patient"):
+            st.markdown("""
+            - "Travaillez-vous dans les serres ou les champs ?"
+            - "Stockez-vous des bidons de produits phytosanitaires à la maison ?"
+            - "Lavez-vous vos vêtements de travail avec le linge de la famille ?"
+            """)
+
+    # --- CAS GÉNÉRAL ---
+    else:
+        st.info("ℹ️ **Analyse générale**")
+        st.write("Les symptômes sélectionnés nécessitent une investigation standard. Pensez toutefois à demander l'environnement professionnel.")
+
+# --- 5. PIED DE PAGE PÉDAGOGIQUE ---
 st.write("---")
-st.header("Résultat")
-st.metric("Empreinte Carbone", f"{co2:.2f} kg CO2e")
-
-nb_smartphones = int(co2 / 0.005)
-st.info(f"📱 Équivalent à la recharge de **{nb_smartphones}** smartphones.")
-
+st.caption("Outil pédagogique développé par **Dr. Rachid AMIHA** pour la formation ISPITS.")
