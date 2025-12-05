@@ -6,10 +6,10 @@ def charger_logo():
     if os.path.exists("logo.png"):
         return "logo.png"
     else:
-        return "🌊" # Vague pour Agadir
+        return "🔬"
 
 st.set_page_config(
-    page_title="Agadir Santé-Env", 
+    page_title="Agadir Dust-Health", 
     page_icon=charger_logo(),
     layout="centered"
 )
@@ -20,127 +20,111 @@ with col_logo:
     if os.path.exists("logo.png"):
         st.image("logo.png", width=100)
     else:
-        st.write("🌊")
+        st.write("🔬")
 
 with col_texte:
     st.title("Dr. Rachid AMIHA")
-    st.subheader("Diagnostic Environnemental : Grand Agadir")
+    st.subheader("Diagnostic Santé-Environnement : Agadir")
 
 st.markdown("---")
 
-# --- 2. PROFIL PATIENT (SPÉCIAL AGADIR) ---
-st.sidebar.header("📍 Localisation du Patient")
+# --- 2. BARRE LATÉRALE : PARAMÈTRES ---
+st.sidebar.header("Dossier Patient")
 
-# Le choix du quartier change tout le diagnostic !
+# Quartiers basés sur votre étude (Table 1 de l'article : Anza, Adrar, Dakhla...)
 quartier = st.sidebar.selectbox(
-    "Quartier de Résidence",
+    "Localisation (Site de prélèvement)",
     [
-        "Anza / Port (Industriel)",
-        "Centre-Ville / Talborjt (Urbain dense)",
-        "Cité Suisse / Sonaba (Humide/Côtier)",
-        "Tikiouine / Drarga (Péri-urbain/Poussière)",
-        "Haut Founty / Illigh (Résidentiel)"
+        "Anza (Industriel/Côtier)",
+        "Centre-Ville / Talborjt (Trafic Intense)",
+        "Adrar / Tikiouine (Péri-urbain/Construction)",
+        "Cité Suisse / Sonaba (Résidentiel)",
+        "Dakhla / Hay Mohammadi (Dense)"
     ]
 )
 
-age_patient = st.sidebar.radio("Patient", ["Enfant", "Adulte", "Senior (>65 ans)"])
-mode_vie = st.sidebar.checkbox("Exposition professionnelle (Travail extérieur/Usine)?")
+age_patient = st.sidebar.radio("Patient", ["Enfant (<10 ans)", "Adulte", "Senior (>65 ans)"])
 
-# --- 3. MOTIFS DE CONSULTATION (SYMPTÔMES) ---
-st.write("### 🩺 Motifs de consultation")
+# OPTION PÉDAGOGIQUE PUISSANTE
+show_science = st.sidebar.checkbox("Afficher les données scientifiques (Source: Amiha et al.)", value=True)
+
+# --- 3. MOTIFS DE CONSULTATION ---
+st.write("### 🩺 Symptômes cliniques")
 
 col1, col2 = st.columns(2)
-
 with col1:
     symptomes_respi = st.multiselect(
-        "Sphère Respiratoire & ORL",
-        ["Toux chronique", "Crise d'asthme", "Rhinite allergique", "Essoufflement (Dyspnée)"]
+        "Respiratoire",
+        ["Toux sèche/irritative", "Crise d'asthme", "Bronchiolite", "Rhinite"]
     )
-
 with col2:
-    symptomes_autres = st.multiselect(
-        "Autres Sphères",
-        ["Irritation des yeux/peau", "Troubles digestifs", "Maux de tête chroniques", "Fatigue inexpliquée"]
+    symptomes_cardio = st.multiselect(
+        "Cardio-vasculaire / Autres",
+        ["Palpitations", "Hypertension", "Irritations cutanées", "Allergies"]
     )
 
-# --- 4. LE CERVEAU D'AGADIR (LOGIQUE MÉTIER) ---
+# --- 4. LE MOTEUR SCIENTIFIQUE (Basé sur votre Article 2022) ---
 st.write("---")
-st.write("### 🔍 Analyse & Enquête Environnementale")
+st.write("### 🔍 Analyse Environnementale (Evidence-Based)")
 
-# Si rien n'est coché
-if not (symptomes_respi or symptomes_autres):
-    st.info("👈 Veuillez renseigner le quartier et les symptômes pour lancer l'analyse contextuelle.")
+if not (symptomes_respi or symptomes_cardio):
+    st.info("👈 En attente des symptômes pour corrélation avec les données de poussières domestiques.")
 
 else:
-    # --- CAS 1 : RESPIRATOIRE + QUARTIER INDUSTRIEL (ANZA) ---
-    if "Anza" in quartier and symptomes_respi:
-        st.error("🏭 **Risque Majeur : Pollution Industrielle & Trafic Poids Lourds**")
-        st.write("Le patient réside dans une zone à forte densité de particules fines (PM10/PM2.5) et rejets industriels.")
+    # --- ANALYSE TRAFIC (CUIVRE/ZINC/FER) ---
+    # Lien avec l'article : Particules issues des freins/pneus (Introduction + Discussion)
+    if "Centre-Ville" in quartier or "Dakhla" in quartier:
+        st.error("🚗 **Facteur de Risque : Poussières de Trafic (Métaux lourds)**")
         
-        with st.expander("🗣️ L'Interrogatoire Ciblé (Anza)", expanded=True):
-            st.markdown("""
-            *   "L'appartement est-il exposé directement à la route nationale (camions) ?"
-            *   "Sentez-vous des odeurs chimiques (farine de poisson/solvants) le soir ?"
-            *   "Avez-vous remarqué des dépôts gras ou noirs sur le linge qui sèche dehors ?"
+        if show_science:
+            st.caption("📚 **Données de l'étude (Bouchriti, Amiha et al. 2022) :**")
+            st.info("""
+            La caractérisation MEB-EDS montre des particules riches en **Fer (Fe), Cuivre (Cu) et Zinc (Zn)**.
+            Origine identifiée : Abrasion des freins et pneus (Trafic intense).
+            Risque : Inflammation systémique et impact cardio-vasculaire.
             """)
-        st.warning("👉 **Action :** Vérifier corrélation des crises avec les heures d'activité portuaire.")
-
-    # --- CAS 2 : RESPIRATOIRE + HUMIDITÉ (CÔTIER / SONABA) ---
-    elif ("Sonaba" in quartier or "Centre" in quartier) and ("Rhinite allergique" in symptomes_respi or "Crise d'asthme" in symptomes_respi):
-        st.warning("💧 **Risque : Moisissures & Acariens (Climat Océanique)**")
-        st.write("Le taux d'humidité à Agadir favorise le développement d'allergènes intérieurs.")
         
-        with st.expander("🗣️ L'Interrogatoire Ciblé (Humidité)", expanded=True):
-            st.markdown("""
-            *   "Avez-vous des traces de moisissures (taches noires) aux murs ou plafonds ?"
-            *   "La ventilation (VMC) fonctionne-t-elle ou ouvrez-vous les fenêtres le matin ?"
-            *   "Les symptômes diminuent-ils quand vous quittez Agadir quelques jours ?"
+        st.markdown("**Question Anamnèse :** *'Le logement donne-t-il directement sur un boulevard fréquenté ? Aérez-vous aux heures de pointe ?'*")
+
+    # --- ANALYSE COMBUSTION / INDUSTRIE (ANZA) ---
+    # Lien avec l'article : Particules Sphériques (17.1%) & Carbonées
+    elif "Anza" in quartier:
+        st.error("🏭 **Facteur de Risque : Particules de Combustion (PM10)**")
+        
+        if show_science:
+            st.caption("📚 **Données de l'étude (Tableau 2) :**")
+            st.info("""
+            Présence élevée de **particules sphériques (17.1%)** riches en Carbone (C) et Soufre (S).
+            Origine : Combustion industrielle et émissions fossiles.
+            Taille : PM10 dominantes (44.6% du total).
             """)
+            
+        st.markdown("**Question Anamnèse :** *'Voyez-vous des dépôts noirs (suies) sur les rebords de fenêtres ?'*")
 
-    # --- CAS 3 : RESPIRATOIRE + POUSSIÈRE (TIKIOUINE / DRARGA) ---
-    elif ("Tikiouine" in quartier) and symptomes_respi:
-        st.warning("🌪️ **Risque : Poussières Terrigènes & Pollens**")
-        st.write("Zone exposée aux vents de terre et proximité des zones semi-arides/agricoles.")
+    # --- ANALYSE CONSTRUCTION / SOL (ADRAR / TIKIOUINE) ---
+    # Lien avec l'article : Particules Angulaires (26.3%) et Silice
+    elif "Adrar" in quartier:
+        st.warning("🏗️ **Facteur de Risque : Poussières Minérales (Silice/Quartz)**")
         
-        with st.expander("🗣️ L'Interrogatoire Ciblé", expanded=True):
-            st.markdown("""
-            *   "Les crises surviennent-elles lors des jours de Chergui (vent d'Est) ?"
-            *   "Y a-t-il des chantiers ou des terrains vagues poussiéreux à proximité immédiate ?"
+        if show_science:
+            st.caption("📚 **Données de l'étude (Morphologie) :**")
+            st.info("""
+            Dominance de particules **Angulaires (26.3%)** et Sub-angulaires.
+            Composition : Silice (Si) et Aluminium (Al).
+            Origine : Érosion des sols et chantiers de construction (Urbanisation rapide).
             """)
-
-    # --- CAS 4 : DIGESTIF (TOUT AGADIR) ---
-    elif "Troubles digestifs" in symptomes_autres:
-        st.warning("🍽️ **Risque : Hygiène Alimentaire / Eau**")
         
-        with st.expander("🗣️ L'Interrogatoire Ciblé", expanded=True):
-            st.markdown("""
-            *   "Avez-vous consommé des coquillages/fruits de mer récemment ?" (Risque biotoxines marines)
-            *   "Utilisez-vous l'eau du robinet ou de l'eau stockée ?"
-            *   "Avez-vous mangé dans la restauration ambulante ?"
-            """)
+        st.markdown("**Question Anamnèse :** *'Y a-t-il des travaux ou des terrains vagues poussiéreux à proximité immédiate ?'*")
 
-    # --- CAS 5 : PEAU / YEUX (TOUT AGADIR) ---
-    elif "Irritation des yeux/peau" in symptomes_autres:
-        if "Anza" in quartier:
-            st.error("⚠️ **Suspicion : Retombées atmosphériques irritantes**")
-        else:
-            st.info("ℹ️ **Investigation :**")
+    # --- RISQUE D'ACCUMULATION (GÉNÉRAL) ---
+    # Lien avec l'article : Taux de dépôt (19.8 g/m²)
+    if "Enfant" in age_patient:
+        st.warning("👶 **Vigilance Pédiatrique : Ingestion & Inhalation**")
+        if show_science:
+            st.info(f"**Taux de dépôt mesuré à Agadir : 19.8 ± 7.4 g/m²/an.**\nC'est une charge élevée qui favorise la resuspension.")
         
-        st.markdown("""
-        *   "Vous baignez-vous dans des zones non surveillées ?"
-        *   "Y a-t-il utilisation de produits phytosanitaires (jardinage/agriculture) à proximité ?"
-        """)
+        st.success("💡 **Conseil Scientifique :** Recommander le **nettoyage humide** (serpillère) plutôt que le balayage à sec qui remet les PM10 en suspension (cité dans l'article).")
 
-    # --- CAS 6 : MAUX DE TÊTE (URBAIN) ---
-    elif "Maux de tête chroniques" in symptomes_autres:
-        st.info("🚗 **Piste : Monoxyde de Carbone ou Bruit**")
-        st.write("En zone urbaine dense, penser à la pollution sonore ou au chauffage défectueux.")
-        st.markdown("""
-        *   "Utilisez-vous un chauffe-eau à gaz sans évacuation extérieure ?" (Urgent)
-        *   "Le logement est-il bruyant la nuit (trafic, commerces) ?"
-        """)
-
-# --- 5. CONCLUSION PÉDAGOGIQUE ---
+# --- 5. FOOTER ---
 st.write("---")
-if symptomes_respi or symptomes_autres:
-    st.success(f"✅ **Synthèse pour l'étudiant :** Pour un {age_patient} habitant à **{quartier.split('(')[0]}**, l'origine environnementale doit être explorée avant de traiter uniquement le symptôme.")
+st.caption("Application basée sur l'article : *Household Dust from a City in Morocco: Characterization by SEM* (**Amiha et al., 2022**).")
